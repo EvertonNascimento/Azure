@@ -212,6 +212,9 @@ Download-Config $uric $cfPath
 Install-Java $jvPath
 Register-Gateway $gatewayKey
 
+Start-Transcript -Path Computer.log
+
+
 Trace-Log "variables:"
 Trace-Log $gatewayKey
 Trace-Log $sub
@@ -469,3 +472,6 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
 
 
 Install-HDIONDEMAND $sub $rg $stacc $container
+
+Stop-Transcript
+
