@@ -192,10 +192,8 @@ function Register-Gateway([string] $instanceKey) {
     Run-Process $filePath "-k $instanceKey"
     Trace-Log "Agent registration is successful!"
 }
-
-
-
 Trace-Log "Log file: $logLoc"
+
 $uri = "https://binfordeploy.blob.core.windows.net/binaries/IntegrationRuntime_4.7.7383.1.msi"
 $urij = "https://binfordeploy.blob.core.windows.net/binaries/jre-8u251-windows-x64.exe"
 $uric = "https://binfordeploy.blob.core.windows.net/binaries/config.txt"
@@ -212,14 +210,19 @@ Install-Gateway $gwPath
 Download-Java $urij $jvPath
 Download-Config $uric $cfPath
 Install-Java $jvPath
-#Register-Gateway $gatewayKey
+Register-Gateway $gatewayKey
 
-
+Trace-Log "variables:"
+Trace-Log $gatewayKey
+Trace-Log $sub
+Trace-Log $rg
+Trace-Log $stacc
+Trace-Log $container
 
 
 ###########################################################HDIONDEMAND############################################################################################
 
-write-host "`n  ## NODEJS INSTALLER ## `n"
+Trace-Log "`n  ## NODEJS INSTALLER ## `n"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 ### CONFIGURATION
 # nodejs
@@ -232,9 +235,9 @@ $url = "https://nodejs.org/dist/$version/node-$version-x64.msi"
 $install_node = $TRUE
 $install_python = $TRUE
     
-write-host "`n----------------------------"
-write-host " system requirements checking  "
-write-host "----------------------------`n"
+Trace-Log "`n----------------------------"
+Trace-Log " system requirements checking  "
+Trace-Log "----------------------------`n"
     
 ### require administator rights
     
@@ -250,7 +253,7 @@ if (Get-Command node -errorAction SilentlyContinue) {
 }
      
 #if ($current_version) {
-#    write-host "[NODE] nodejs $current_version already installed"
+#    Trace-Log "[NODE] nodejs $current_version already installed"
 #    $confirmation = read-host "Are you sure you want to replace this version ? [y/N]"
 #    if ($confirmation -ne "y") {
 #        $install_node = $FALSE
@@ -263,9 +266,9 @@ if ($install_node) {
     ### download nodejs msi file
     # warning : if a node.msi file is already present in the current folder, this script will simply use it
             
-    write-host "`n----------------------------"
-    write-host "  nodejs msi file retrieving  "
-    write-host "----------------------------`n"
+    Trace-Log "`n----------------------------"
+    Trace-Log "  nodejs msi file retrieving  "
+    Trace-Log "----------------------------`n"
     
     $filename = "node.msi"
     $node_msi = "$PSScriptRoot\$filename"
@@ -280,35 +283,35 @@ if ($install_node) {
     #}
     
     #if ($download_node) {
-    write-host "[NODE] downloading nodejs install"
-    write-host "url : $url"
+    Trace-Log "[NODE] downloading nodejs install"
+    Trace-Log "url : $url"
     $start_time = Get-Date
     $wc = New-Object System.Net.WebClient
     $wc.DownloadFile($url, $node_msi)
     write-Output "$filename downloaded"
     write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
     #} else {
-    #    write-host "using the existing node.msi file"
+    #    Trace-Log "using the existing node.msi file"
     #}
     
     ### nodejs install
     
-    write-host "`n----------------------------"
-    write-host " nodejs installation  "
-    write-host "----------------------------`n"
+    Trace-Log "`n----------------------------"
+    Trace-Log " nodejs installation  "
+    Trace-Log "----------------------------`n"
     
-    write-host "[NODE] running $node_msi"
+    Trace-Log "[NODE] running $node_msi"
     Start-Process $node_msi -ArgumentList "/quiet " -Wait
         
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User") 
         
 }
 else {
-    write-host "Proceeding with the previously installed nodejs version ..."
+    Trace-Log "Proceeding with the previously installed nodejs version ..."
 }
     
     
-write-host "`n  ## Python INSTALLER ## `n"
+Trace-Log "`n  ## Python INSTALLER ## `n"
     
 # Python
 #v14.15.4
@@ -321,9 +324,9 @@ if ($install_python) {
     ### download nodejs msi file
     # warning : if a node.msi file is already present in the current folder, this script will simply use it
             
-    write-host "`n----------------------------"
-    write-host "  python file retrieving  "
-    write-host "----------------------------`n"
+    Trace-Log "`n----------------------------"
+    Trace-Log "  python file retrieving  "
+    Trace-Log "----------------------------`n"
     
     $filename = "python.exe"
     $python_exe = "$PSScriptRoot\$filename"
@@ -338,31 +341,31 @@ if ($install_python) {
     #}
     
     #if ($download_node) {
-    write-host "[Python] downloading nodejs install"
-    write-host "url : $pythonurl"
+    Trace-Log "[Python] downloading nodejs install"
+    Trace-Log "url : $pythonurl"
     $start_time = Get-Date
     $wc = New-Object System.Net.WebClient
     $wc.DownloadFile($pythonurl, $python_exe)
     write-Output "$filename downloaded"
     write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
     #} else {
-    #    write-host "using the existing node.msi file"
+    #    Trace-Log "using the existing node.msi file"
     #}
     
     ### nodejs install
     
-    write-host "`n----------------------------"
-    write-host " python installation  "
-    write-host "----------------------------`n"
+    Trace-Log "`n----------------------------"
+    Trace-Log " python installation  "
+    Trace-Log "----------------------------`n"
     
-    write-host "[PYTHON] running $python_exe"
+    Trace-Log "[PYTHON] running $python_exe"
     Start-Process $python_exe -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1 Include_test=0" -Wait 
         
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User") 
         
 }
 else {
-    write-host "Proceeding with the previously installed python version ..."
+    Trace-Log "Proceeding with the previously installed python version ..."
 }
     
 
@@ -377,7 +380,7 @@ Function DownloadBlobContents {
     )
     
 
-    Write-Host -ForegroundColor Green "Download blob contents from storage container.."    
+    Trace-Log -ForegroundColor Green "Download blob contents from $stname container..$container"    
     ## Get the storage account  
     $storageAcc = Get-AzStorageAccount -ResourceGroupName $rg -Name $stname 
     ## Get the storage account key 
@@ -389,7 +392,7 @@ Function DownloadBlobContents {
     ## Loop through the containers  
     ## check if folder exists  
     #$folderPath=$downloadPath+"\"+$container.Name  
-    Write-Host -ForegroundColor Magenta $container "-downloading contents"  
+    Trace-Log -ForegroundColor Magenta $container "-downloading contents"  
     ## Get the blob contents from the container  
     $blobContents = Get-AzStorageBlob -Container $container  -Context $ctx  
     foreach ($blobContent in $blobContents) {  
@@ -422,6 +425,7 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
 
     #till i find a storage account to test.
     #Connect-AzAccount
+    Trace-Log "setting context to sub: $sub"
     Set-AzContext -SubscriptionId $sub
     #$stname = "devtesthdisabs"
     #$rg = "DHUB_GPA-DEV-SAS"
@@ -445,7 +449,7 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     
     Expand-Archive .\hdiondemand.zip -DestinationPath .
     
-    Write-Host "CREATING PARAMETERS FILE"
+    Trace-Log "CREATING PARAMETERS FILE"
     $planfile = "gpaplan.txt"
     $loc = (Get-Location).tostring()
     
