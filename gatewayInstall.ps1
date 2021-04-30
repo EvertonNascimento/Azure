@@ -226,6 +226,7 @@ Trace-Log $container
 ###########################################################HDIONDEMAND############################################################################################
 
 Trace-Log "`n  ## NODEJS INSTALLER ## `n"
+Set-ExecutionPolicy Unrestricted -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 ### CONFIGURATION
 # nodejs
