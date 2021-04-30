@@ -363,7 +363,7 @@ if ($install_python) {
     Trace-Log "----------------------------`n"
     
     Trace-Log "[PYTHON] running $python_exe"
-    Start-Process $python_exe -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1 Include_test=0" -Wait 
+    Start-Process $python_exe -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 /log '%WINDIR%\Temp\Python39-Install.log'" -Wait 
         
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User") 
         
