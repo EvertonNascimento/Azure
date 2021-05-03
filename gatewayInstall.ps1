@@ -407,15 +407,26 @@ Function DownloadBlobContents {
         
 } 
     
+    
+#downloadazfunctions
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser 
+Install-Module -Name PowerShellGet -Force -Scope CurrentUser -AllowClobber
+Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted   
+Install-Module -Name Az -AllowClobber -Scope CurrentUser
+$modules = Get-InstalledModule -Name Az -AllVersions
+$path = $modules[$modules.count-1].installedlocation
+$path
+$newModulePath = $env:PSModulePath + ";" + $path + ";" + $path.substring(0, $path.length-9)
+[Environment]::SetEnvironmentVariable("PSModulePath",$newModulePath)
+Write-Host "PSModulePath " + $env:PSModulePath
+$azmodule = $path + "\Az"
+import-module -Name $azmodule -verbose
+Get-Command Connect-AzAccount
+#Get-InstalledModule -Name Az -AllVersions
+
 
 function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
-    #downloadazfunctions
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser 
-    Install-Module -Name PowerShellGet -Force -Scope CurrentUser -AllowClobber
-    Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-    Install-Module -Name Az -AllowClobber -Scope CurrentUser | Import-Module
-    #Get-InstalledModule -Name Az -AllVersions
-    #Start-Sleep -Seconds 30 q
+
     
     #$sub = "8aab2f07-7d43-4bab-8704-4dc764ee6190"
     #az principal information
@@ -424,8 +435,6 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     $azurePassword = ConvertTo-SecureString "RnhHKNZbl02t_jucWUa84_EU.ZQCP_3RwJ" -AsPlainText -Force
     $psCred = New-Object System.Management.Automation.PSCredential($azureAplicationId , $azurePassword)
     Connect-AzAccount -Credential $psCred -TenantId $azureTenantId  -ServicePrincipal
-    
-    
 
     #till i find a storage account to test.
     #Connect-AzAccount
