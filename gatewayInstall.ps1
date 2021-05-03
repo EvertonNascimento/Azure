@@ -204,13 +204,12 @@ $jvPath = "C:\Packages\jre.exe"
 $cfPath = "C:\Packages\config.cfg"
 Trace-Log "Gateway download location: $gwPath"
 
-#Download-Gateway $uri $gwPath
-
-#Install-Gateway $gwPath
-#Download-Java $urij $jvPath
-#Download-Config $uric $cfPath
-#Install-Java $jvPath
-#Register-Gateway $gatewayKey
+Download-Gateway $uri $gwPath
+Install-Gateway $gwPath
+Download-Java $urij $jvPath
+Download-Config $uric $cfPath
+Install-Java $jvPath
+Register-Gateway $gatewayKey
 
 Start-Transcript -Path Computer.log
 
@@ -245,10 +244,6 @@ Trace-Log "----------------------------`n"
     
 ### require administator rights
     
-if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    write-Warning "This setup needs admin permissions. Please run this file as admin."     
-    break
-}
     
 ### nodejs version check
     
@@ -426,6 +421,13 @@ $azmodule = $path + "\Az"
 import-module -Name $azmodule -verbose
 Get-Command Connect-AzAccount
 
+
+function start-jobhere([scriptblock]$block){
+    start-job -argumentlist (get-location),$block { set-location $args[0]; invoke-expression $args[1] }
+ }
+
+
+
 function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
 
     
@@ -478,10 +480,9 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     #pip uninstall -y cffi
     #pip install cffi
     #func init --worker-runtime python
-    func start --verbose true > azflogs.txt
+    start-jobhere {func start --verbose true > azflogs.txt}
 
 }
-
 
 
 Install-HDIONDEMAND $sub $rg $stacc $container
