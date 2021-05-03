@@ -204,13 +204,13 @@ $jvPath = "C:\Packages\jre.exe"
 $cfPath = "C:\Packages\config.cfg"
 Trace-Log "Gateway download location: $gwPath"
 
-Download-Gateway $uri $gwPath
+#Download-Gateway $uri $gwPath
 
-Install-Gateway $gwPath
-Download-Java $urij $jvPath
-Download-Config $uric $cfPath
-Install-Java $jvPath
-Register-Gateway $gatewayKey
+#Install-Gateway $gwPath
+#Download-Java $urij $jvPath
+#Download-Config $uric $cfPath
+#Install-Java $jvPath
+#Register-Gateway $gatewayKey
 
 Start-Transcript -Path Computer.log
 
@@ -406,12 +406,15 @@ Function DownloadBlobContents {
           
         
 } 
-    
-    
+
+
 #downloadazfunctions
 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser 
 Install-Module -Name PowerShellGet -Force -Scope CurrentUser -AllowClobber
-Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted   
+Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+
+
+
 Install-Module -Name Az -AllowClobber -Scope CurrentUser
 $modules = Get-InstalledModule -Name Az -AllVersions
 $path = $modules[$modules.count-1].installedlocation
@@ -422,8 +425,6 @@ Write-Host "PSModulePath " + $env:PSModulePath
 $azmodule = $path + "\Az"
 import-module -Name $azmodule -verbose
 Get-Command Connect-AzAccount
-#Get-InstalledModule -Name Az -AllVersions
-
 
 function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
 
@@ -435,6 +436,8 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     $azurePassword = ConvertTo-SecureString "RnhHKNZbl02t_jucWUa84_EU.ZQCP_3RwJ" -AsPlainText -Force
     $psCred = New-Object System.Management.Automation.PSCredential($azureAplicationId , $azurePassword)
     Connect-AzAccount -Credential $psCred -TenantId $azureTenantId  -ServicePrincipal
+    
+    
 
     #till i find a storage account to test.
     #Connect-AzAccount
@@ -484,4 +487,3 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
 Install-HDIONDEMAND $sub $rg $stacc $container
 
 Stop-Transcript
-
