@@ -480,7 +480,7 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     #pip uninstall -y cffi
     #pip install cffi
     #func init --worker-runtime python
-    start-jobhere {func start --verbose true > azflogs.txt}
+    func start --verbose true > azflogs.txt
 
 }
 
