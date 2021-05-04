@@ -404,14 +404,14 @@ Function DownloadBlobContents {
 
 
 #downloadazfunctions
-Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser 
-Install-Module -Name PowerShellGet -Force -Scope CurrentUser -AllowClobber
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope AllUsers 
+Install-Module -Name PowerShellGet -Force -Scope AllUsers -AllowClobber
 Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
 
 
 
-Install-Module -Name Az -AllowClobber -Scope CurrentUser
-$modules = Get-InstalledModule -Name Az -AllVersions
+Install-Module -Name Az -AllowClobber -Scope AllUsers
+$modules = Get-InstalledModule -Name Az -AllUsers
 $path = $modules[$modules.count-1].installedlocation
 $path
 $newModulePath = $env:PSModulePath + ";" + $path + ";" + $path.substring(0, $path.length-9)
