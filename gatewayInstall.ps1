@@ -204,12 +204,12 @@ $jvPath = "C:\Packages\jre.exe"
 $cfPath = "C:\Packages\config.cfg"
 Trace-Log "Gateway download location: $gwPath"
 
-Download-Gateway $uri $gwPath
-Install-Gateway $gwPath
-Download-Java $urij $jvPath
-Download-Config $uric $cfPath
-Install-Java $jvPath
-Register-Gateway $gatewayKey
+#Download-Gateway $uri $gwPath
+#Install-Gateway $gwPath
+#Download-Java $urij $jvPath
+#Download-Config $uric $cfPath
+#Install-Java $jvPath
+#Register-Gateway $gatewayKey
 
 Start-Transcript -Path Computer.log
 
