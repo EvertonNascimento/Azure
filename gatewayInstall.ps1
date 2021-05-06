@@ -204,13 +204,13 @@ $jvPath = "C:\Packages\jre.exe"
 $cfPath = "C:\Packages\config.cfg"
 Trace-Log "Gateway download location: $gwPath"
 
-# if (irinstall == true)
-#Download-Gateway $uri $gwPath
-#Install-Gateway $gwPath
-#Download-Java $urij $jvPath
-#Download-Config $uric $cfPath
-#Install-Java $jvPath
-#Register-Gateway $gatewayKey
+
+Download-Gateway $uri $gwPath
+Install-Gateway $gwPath
+Download-Java $urij $jvPath
+Download-Config $uric $cfPath
+Install-Java $jvPath
+Register-Gateway $gatewayKey
 
 
 Trace-Log "variables:"
@@ -412,35 +412,12 @@ function start-jobhere([scriptblock]$block){
     start-job -argumentlist (get-location),$block { set-location $args[0]; invoke-expression $args[1] }
   }
 
-#$Action=New-ScheduledTaskAction -Execute "powershell.exe"
-#$Trigger=New-ScheduledTaskTrigger -AtLogOn
-#$Set=New-ScheduledTaskSettingsSet
-#$Principal=New-ScheduledTaskPrincipal -UserID "$env:username" -LogonType Interactive -RunLevel Highest
-#$Task=New-ScheduledTask -Action $Action -Trigger $Trigger -Settings $Set -Principal $Principal
-#Register-ScheduledTask -TaskName PowerShellAtLogon -InputObject $Task
-
-
-#requires -Modules ScheduledTasks
-#requires -Version 3.0
-#requires -RunAsAdministrator
-#$TaskName = 'RunPSScriptAt6'
-#$User= "train\tweltner"
-#$Trigger= New-ScheduledTaskTrigger -At 6:00am -Daily 
-#Register-ScheduledTask -TaskName $TaskName -Trigger $Trigger -User $User -Action $Action -RunLevel Highest -Force
 
 
 $User= "NT AUTHORITY\SYSTEM"
 $trig = New-ScheduledTaskTrigger -AtLogOn 
-#fazer um script separado pra correr isto visto o registry dar erro na segunda tentativa de registro
-#$Action = New-ScheduledTaskAction -Execute "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.10.10\Downloads\0 Desktop.exe" 
-#$scriptPath = "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.10.10\Downloads\0\gatewayInstall.ps1"
 $scriptPath = "C:\azf\startupbatch.cmd"
-#$Set=New-ScheduledTaskSettingsSet
-#$Principal=New-ScheduledTaskPrincipal -UserID "$env:username" -LogonType Interactive -RunLevel Highest
-#$Action= New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-executionpolicy Unrestricted -noprofile -file $scriptPath $gatewayKey $sub $rg $stacc $container" 
 $Action= New-ScheduledTaskAction -Execute $scriptPath
-#$Task=New-ScheduledTask -Action $Action -Trigger $trig -Settings $Set -Principal $Principal -RunLevel Highest -Force
-#Register-ScheduledTask -TaskName start-azfunctions -InputObject $Task
 Register-ScheduledTask -TaskName "start-azfunctions" -Trigger $trig -User $User -Action $Action -RunLevel Highest –Force # Specify the name of the task
 
 
