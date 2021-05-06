@@ -204,14 +204,13 @@ $jvPath = "C:\Packages\jre.exe"
 $cfPath = "C:\Packages\config.cfg"
 Trace-Log "Gateway download location: $gwPath"
 
+# if (irinstall == true)
 #Download-Gateway $uri $gwPath
 #Install-Gateway $gwPath
 #Download-Java $urij $jvPath
 #Download-Config $uric $cfPath
 #Install-Java $jvPath
 #Register-Gateway $gatewayKey
-
-Start-Transcript -Path Computer.log
 
 
 Trace-Log "variables:"
@@ -222,10 +221,11 @@ Trace-Log $stacc
 Trace-Log $container
 
 
+
+
 ###########################################################HDIONDEMAND############################################################################################
 
 Trace-Log "`n  ## NODEJS INSTALLER ## `n"
-Set-ExecutionPolicy Unrestricted -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 ### CONFIGURATION
 # nodejs
@@ -244,6 +244,10 @@ Trace-Log "----------------------------`n"
     
 ### require administator rights
     
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    write-Warning "This setup needs admin permissions. Please run this file as admin."     
+    break
+}
     
 ### nodejs version check
     
@@ -358,7 +362,7 @@ if ($install_python) {
     Trace-Log "----------------------------`n"
     
     Trace-Log "[PYTHON] running $python_exe"
-    Start-Process $python_exe -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 /log '%WINDIR%\Temp\Python39-Install.log'" -Wait 
+    Start-Process $python_exe -ArgumentList "/quiet InstallAllUsers=0 PrependPath=1 Include_test=0" -Wait 
         
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User") 
         
@@ -401,35 +405,54 @@ Function DownloadBlobContents {
           
         
 } 
-
-
-#downloadazfunctions
-Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope AllUsers 
-Install-Module -Name PowerShellGet -Force -Scope AllUsers -AllowClobber
-Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-
-
-
-Install-Module -Name Az -AllowClobber -Scope AllUsers
-$modules = Get-InstalledModule -Name Az -AllUsers
-$path = $modules[$modules.count-1].installedlocation
-$path
-$newModulePath = $env:PSModulePath + ";" + $path + ";" + $path.substring(0, $path.length-9)
-[Environment]::SetEnvironmentVariable("PSModulePath",$newModulePath)
-Write-Host "PSModulePath " + $env:PSModulePath
-$azmodule = $path + "\Az"
-import-module -Name $azmodule -verbose
-Get-Command Connect-AzAccount
+    
 
 
 function start-jobhere([scriptblock]$block){
     start-job -argumentlist (get-location),$block { set-location $args[0]; invoke-expression $args[1] }
- }
+  }
+
+#$Action=New-ScheduledTaskAction -Execute "powershell.exe"
+#$Trigger=New-ScheduledTaskTrigger -AtLogOn
+#$Set=New-ScheduledTaskSettingsSet
+#$Principal=New-ScheduledTaskPrincipal -UserID "$env:username" -LogonType Interactive -RunLevel Highest
+#$Task=New-ScheduledTask -Action $Action -Trigger $Trigger -Settings $Set -Principal $Principal
+#Register-ScheduledTask -TaskName PowerShellAtLogon -InputObject $Task
+
+
+#requires -Modules ScheduledTasks
+#requires -Version 3.0
+#requires -RunAsAdministrator
+#$TaskName = 'RunPSScriptAt6'
+#$User= "train\tweltner"
+#$Trigger= New-ScheduledTaskTrigger -At 6:00am -Daily 
+#Register-ScheduledTask -TaskName $TaskName -Trigger $Trigger -User $User -Action $Action -RunLevel Highest -Force
+
+
+$User= "NT AUTHORITY\SYSTEM"
+$trig = New-ScheduledTaskTrigger -AtLogOn 
+#fazer um script separado pra correr isto visto o registry dar erro na segunda tentativa de registro
+#$Action = New-ScheduledTaskAction -Execute "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.10.10\Downloads\0 Desktop.exe" 
+#$scriptPath = "C:\Packages\Plugins\Microsoft.Compute.CustomScriptExtension\1.10.10\Downloads\0\gatewayInstall.ps1"
+$scriptPath = "C:\azf\startupbatch.cmd"
+#$Set=New-ScheduledTaskSettingsSet
+#$Principal=New-ScheduledTaskPrincipal -UserID "$env:username" -LogonType Interactive -RunLevel Highest
+#$Action= New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-executionpolicy Unrestricted -noprofile -file $scriptPath $gatewayKey $sub $rg $stacc $container" 
+$Action= New-ScheduledTaskAction -Execute $scriptPath
+#$Task=New-ScheduledTask -Action $Action -Trigger $trig -Settings $Set -Principal $Principal -RunLevel Highest -Force
+#Register-ScheduledTask -TaskName start-azfunctions -InputObject $Task
+Register-ScheduledTask -TaskName "start-azfunctions" -Trigger $trig -User $User -Action $Action -RunLevel Highest –Force # Specify the name of the task
 
 
 
 function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
-
+    #downloadazfunctions
+    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser 
+    Install-Module -Name PowerShellGet -Force -Scope CurrentUser -AllowClobber
+    Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+    Install-Module -Name Az -AllowClobber -Scope CurrentUser | Import-Module
+    #Get-InstalledModule -Name Az -AllVersions
+    #Start-Sleep -Seconds 30 q
     
     #$sub = "8aab2f07-7d43-4bab-8704-4dc764ee6190"
     #az principal information
@@ -454,20 +477,24 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     $stkeys = Get-AzStorageAccountKey -ResourceGroupName $rg -AccountName $stacc
     $ctx = New-AzStorageContext -StorageAccountName $stacc -StorageAccountKey $stkeys[0].value
     
-    mkdir azf
+    $targetpath = "C:\azf"
+
+    mkdir $targetpath
     $ContainerName = $container
     $BlobName = "hdiondemand"
-    $target = "$PSScriptRoot\azf"
-    
+    #$target = "$PSScriptRoot\azf"
+    $target = $targetpath
     #Get-AzureStorageBlobContent -Blob $BlobName -Container $ContainerName `
     #-Destination $target -Context $ctx
     
-    DownloadBlobContents -stname $stacc -sub $sub -rg $rg -target $target -container $ContainerName
-    Set-Location azf
-    
+    DownloadBlobContents -stname $stacc -sub $sub -rg $rg -target $targetpath -container $ContainerName
+
+    #expand the archive in C:\azf
+    Set-Location $targetpath
     Expand-Archive .\hdiondemand.zip -DestinationPath .
     
     Trace-Log "CREATING PARAMETERS FILE"
+    #TO:DO: mudar o nome pra algo mais generico
     $planfile = "gpaplan.txt"
     $loc = (Get-Location).tostring()
     
@@ -476,15 +503,13 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     npm i -g azure-functions-core-tools@3 --unsafe-perm true --force
     pip install virtualenv
     virtualenv .venv 
-    .venv\scripts\activate
+    #.venv\scripts\activate
     #pip uninstall -y cffi
     #pip install cffi
     #func init --worker-runtime python
-    start-jobhere{func start --verbose true > azflogs.txt}
-
+    #start-jobhere {func start --verbose true > azflogs.txt}
 }
 
-
 Install-HDIONDEMAND $sub $rg $stacc $container
-
-Stop-Transcript
+#Trigger a restart to start azfunctions
+Restart-Computer -Force
