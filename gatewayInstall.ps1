@@ -418,7 +418,7 @@ $User= "NT AUTHORITY\SYSTEM"
 $trig = New-ScheduledTaskTrigger -AtLogOn 
 $scriptPath = "C:\azf\startupbatch.cmd"
 $Action= New-ScheduledTaskAction -Execute $scriptPath
-Register-ScheduledTask -TaskName "start-azfunctions" -Trigger $trig -User $User -Action $Action -RunLevel Highest –Force # Specify the name of the task
+Register-ScheduledTask -TaskName "start-azfunctions" -Trigger $trig -User $User -Action $Action -RunLevel Highest -Force # Specify the name of the task
 
 
 
@@ -471,10 +471,11 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     Expand-Archive .\hdiondemand.zip -DestinationPath .
     
     Trace-Log "CREATING PARAMETERS FILE"
-    #TO:DO: mudar o nome pra algo mais generico
+
+  
     $planfile = "gpaplan.txt"
     $loc = (Get-Location).tostring()
-    
+
     python create_parameters.py $planfile $loc
     
     npm i -g azure-functions-core-tools@3 --unsafe-perm true --force
