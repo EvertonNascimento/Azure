@@ -51,7 +51,7 @@
           ]
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -WindowStyle Hidden -File gatewayInstall.ps1 ', if(equals(parameters('existingDataFactoryVersion'), 'V2'), listAuthKeys(parameters('datafactoryId'), '2017-09-01-preview').authKey1, listAuthKeys(parameters('datafactoryId'), '2015-10-01').key1), ' ', parameters('subId'), ' ', parameters('storageaccountrg'), ' ', parameters('storageaccountname'), ' ',parameters('container'))]"
+          "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File gatewayInstall.ps1 ', if(equals(parameters('existingDataFactoryVersion'), 'V2'), listAuthKeys(parameters('datafactoryId'), '2017-09-01-preview').authKey1, listAuthKeys(parameters('datafactoryId'), '2015-10-01').key1), ' ', parameters('subId'), ' ', parameters('storageaccountrg'), ' ', parameters('storageaccountname'), ' ',parameters('container'))]"
         }
       }
     }
