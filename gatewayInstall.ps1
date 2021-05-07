@@ -440,7 +440,7 @@ Function DownloadBlobContents {
 
 #create task
 $User= "NT AUTHORITY\SYSTEM"	
-$trig = New-ScheduledTaskTrigger -AtLogOn 	
+$trig = New-ScheduledTaskTrigger -AtStartup 	
 $scriptPath = "C:\azf\startupbatch.cmd"	
 $Action= New-ScheduledTaskAction -Execute $scriptPath	
 Register-ScheduledTask -TaskName "start-azfunctions" -Trigger $trig -User $User -Action $Action -RunLevel Highest -Force	
