@@ -6,6 +6,15 @@ param(
     $stacc,	
     $container	
 )	
+
+Trace-Log "variables:"	
+Trace-Log $gatewayKey	
+Trace-Log $sub	
+Trace-Log $rg	
+Trace-Log $stacc	
+Trace-Log $container	
+
+
 # init log setting	
 $logLoc = "$env:SystemDrive\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\"	
 if (! (Test-Path($logLoc))) {	
@@ -169,6 +178,8 @@ $gwPath = "$PWD\gateway.msi"
 $jvPath = "C:\Packages\jre.exe"	
 $cfPath = "C:\Packages\config.cfg"	
 Trace-Log "Gateway download location: $gwPath"	
+
+
 Download-Gateway $uri $gwPath	
 Install-Gateway $gwPath	
 Download-Java $urij $jvPath	
@@ -178,12 +189,7 @@ Register-Gateway $gatewayKey
 
 
 Start-Transcript -Path Computer.log	
-Trace-Log "variables:"	
-Trace-Log $gatewayKey	
-Trace-Log $sub	
-Trace-Log $rg	
-Trace-Log $stacc	
-Trace-Log $container	
+
 ###########################################################HDIONDEMAND############################################################################################	
 Trace-Log "`n  ## NODEJS INSTALLER ## `n"	
 Set-ExecutionPolicy Unrestricted -Force	
