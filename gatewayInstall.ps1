@@ -328,20 +328,7 @@ else {
     Trace-Log "Proceeding with the previously installed python version ..."	
 }	
     	
-#downloadazfunctions	
-Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope AllUsers 	
-Install-Module -Name PowerShellGet -Force -Scope AllUsers -AllowClobber	
-Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted	
-Install-Module -Name Az -AllowClobber -Scope AllUsers	
-$modules = Get-InstalledModule -Name Az -AllUsers	
-$path = $modules[$modules.count-1].installedlocation	
-$path	
-$newModulePath = $env:PSModulePath + ";" + $path + ";" + $path.substring(0, $path.length-9)	
-[Environment]::SetEnvironmentVariable("PSModulePath",$newModulePath)	
-Write-Host "PSModulePath " + $env:PSModulePath	
-$azmodule = $path + "\Az"	
-import-module -Name $azmodule -verbose	
-Get-Command Connect-AzAccount	
+
 Function DownloadBlobContents {  	
     param(	
         $stname,	
@@ -384,15 +371,35 @@ $Action= New-ScheduledTaskAction -Execute $scriptPath
 Register-ScheduledTask -TaskName "start-azfunctions" -Trigger $trig -User $User -Action $Action -RunLevel Highest -Force	
 
 
-#install AZ packages
+#downloadazfunctions	
 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope AllUsers 	
 Install-Module -Name PowerShellGet -Force -Scope AllUsers -AllowClobber	
 Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted	
+Install-Module -Name Az -AllowClobber -Scope AllUsers	
+$modules = Get-InstalledModule -Name Az -AllUsers	
+$path = $modules[$modules.count-1].installedlocation	
+$path	
+$newModulePath = $env:PSModulePath + ";" + $path + ";" + $path.substring(0, $path.length-9)	
 [Environment]::SetEnvironmentVariable("PSModulePath",$newModulePath)	
 Write-Host "PSModulePath " + $env:PSModulePath	
 $azmodule = $path + "\Az"	
 import-module -Name $azmodule -verbose	
 Get-Command Connect-AzAccount	
+
+
+
+
+
+
+#install AZ packages
+#Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope AllUsers 	
+#Install-Module -Name PowerShellGet -Force -Scope AllUsers -AllowClobber	
+#Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted	
+#[Environment]::SetEnvironmentVariable("PSModulePath",$newModulePath)	
+#Write-Host "PSModulePath " + $env:PSModulePath	
+#$azmodule = $path + "\Az"	
+#import-module -Name $azmodule -verbose	
+#Get-Command Connect-AzAccount	
 
 
 
