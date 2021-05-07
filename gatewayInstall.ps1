@@ -7,13 +7,6 @@ param(
     $container	
 )	
 
-Trace-Log "variables:"	
-Trace-Log $gatewayKey	
-Trace-Log $sub	
-Trace-Log $rg	
-Trace-Log $stacc	
-Trace-Log $container	
-
 
 # init log setting
 $logLoc = "$env:SystemDrive\WindowsAzure\Logs\Plugins\Microsoft.Compute.CustomScriptExtension\"
@@ -234,6 +227,14 @@ function Register-Gateway([string] $instanceKey)
 	Run-Process $filePath "-k $instanceKey"
     Trace-Log "Agent registration is successful!"
 }
+
+
+Trace-Log "variables:"	
+Trace-Log $gatewayKey	
+Trace-Log $sub	
+Trace-Log $rg	
+Trace-Log $stacc	
+Trace-Log $container	
 
 
 
