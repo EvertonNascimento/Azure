@@ -4,7 +4,8 @@ param(
     $sub,	
     $rg,	
     $stacc,	
-    $container	
+    $container,
+    $installondemand
 )	
 
 
@@ -287,14 +288,6 @@ if (Get-Command node -errorAction SilentlyContinue) {
     $current_version = (node -v)	
 }	
      	
-#if ($current_version) {	
-#    Trace-Log "[NODE] nodejs $current_version already installed"	
-#    $confirmation = read-host "Are you sure you want to replace this version ? [y/N]"	
-#    if ($confirmation -ne "y") {	
-#        $install_node = $FALSE	
-#    }	
-#}	
-    	
     	
 if ($install_node) {	
         	
@@ -308,16 +301,6 @@ if ($install_node) {
     $filename = "node.msi"	
     $node_msi = "$PSScriptRoot\$filename"	
         	
-    #$download_node = $TRUE	
-    	
-    #if (Test-Path $node_msi) {	
-    #   $confirmation = read-host "Local $filename file detected. Do you want to use it ? [Y/n]"	
-    #    if ($confirmation -eq "n") {	
-    #        $download_node = $FALSE	
-    #    }	
-    #}	
-    	
-    #if ($download_node) {	
     Trace-Log "[NODE] downloading nodejs install"	
     Trace-Log "url : $url"	
     $start_time = Get-Date	
@@ -325,11 +308,7 @@ if ($install_node) {
     $wc.DownloadFile($url, $node_msi)	
     write-Output "$filename downloaded"	
     write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"	
-    #} else {	
-    #    Trace-Log "using the existing node.msi file"	
-    #}	
-    	
-    ### nodejs install	
+
     	
     Trace-Log "`n----------------------------"	
     Trace-Log " nodejs installation  "	
@@ -366,15 +345,6 @@ if ($install_python) {
     $filename = "python.exe"	
     $python_exe = "$PSScriptRoot\$filename"	
         	
-    #$download_node = $TRUE	
-    #if (Test-Path $node_msi) {	
-    #   $confirmation = read-host "Local $filename file detected. Do you want to use it ? [Y/n]"	
-    #    if ($confirmation -eq "n") {	
-    #        $download_node = $FALSE	
-    #    }	
-    #}	
-    	
-    #if ($download_node) {	
     Trace-Log "[Python] downloading nodejs install"	
     Trace-Log "url : $pythonurl"	
     $start_time = Get-Date	
@@ -382,11 +352,7 @@ if ($install_python) {
     $wc.DownloadFile($pythonurl, $python_exe)	
     write-Output "$filename downloaded"	
     write-Output "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"	
-    #} else {	
-    #    Trace-Log "using the existing node.msi file"	
-    #}	
-    	
-    ### nodejs install	
+
     	
     Trace-Log "`n----------------------------"	
     Trace-Log " python installation  "	
@@ -435,6 +401,7 @@ Function DownloadBlobContents {
         	
 }
 
+Function setupenvironment(){
 
 #create task
 $User= "NT AUTHORITY\SYSTEM"	
@@ -459,15 +426,16 @@ $azmodule = $path + "\Az"
 import-module -Name $azmodule -verbose	
 Get-Command Connect-AzAccount	
 
-
-
-
-
+}
 
 function start-jobhere([scriptblock]$block){	
     start-job -argumentlist (get-location),$block { set-location $args[0]; invoke-expression $args[1] }	
  }	
-function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {	
+function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
+    
+
+    #sets up the environment
+    setupenvironment
     	
     #$sub = "8aab2f07-7d43-4bab-8704-4dc764ee6190"	
     #az principal information	
@@ -486,16 +454,15 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     $targetpath = "C:\azf"
     mkdir $targetpath	
     $ContainerName = $container	
-    $BlobName = "hdiondemand"	
-    $target = $targetpath	
     	
     DownloadBlobContents -stname $stacc -sub $sub -rg $rg -target $targetpath -container $ContainerName	
     #expand the archive in C:\azf	
     Set-Location $targetpath	
     Expand-Archive .\hdiondemand.zip -DestinationPath .	
     	
-    Trace-Log "CREATING PARAMETERS FILE"	
-    $planfile = "gpaplan.txt"	
+    Trace-Log "CREATING PARAMETERS FILE"
+    #generate file command always remains with the same file name	
+    $planfile = "hdiplan.txt"	
     $loc = (Get-Location).tostring()	
     	
     python create_parameters.py $planfile $loc	
@@ -508,8 +475,12 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     #pip install cffi	
     #func init --worker-runtime python	
     #start-jobhere {func start --verbose true > azflogs.txt}	
-}	
-Install-HDIONDEMAND $sub $rg $stacc $container
+}
+
+
+#install azure functions on the machine
+if (installondemand -eq "true") {Install-HDIONDEMAND $sub $rg $stacc $container}
+
 Stop-Transcript
 	
 #Trigger a restart to start azfunctions	
