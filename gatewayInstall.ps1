@@ -5,7 +5,10 @@ param(
     $rg,	
     $stacc,	
     $container,
-    $installondemand
+    $installondemand,
+    $appid,
+    $tenant,
+    $pass
 )	
 
 
@@ -436,12 +439,11 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
 
     #sets up the environment
     setupenvironment
-    	
-    #$sub = "8aab2f07-7d43-4bab-8704-4dc764ee6190"	
+   	
     #az principal information	
-    $azureAplicationId = "e5f3fc75-5a98-4438-8008-1311593099e2"	
-    $azureTenantId = "5d471751-9675-428d-917b-70f44f9630b0"	
-    $azurePassword = ConvertTo-SecureString "RnhHKNZbl02t_jucWUa84_EU.ZQCP_3RwJ" -AsPlainText -Force	
+    $azureAplicationId = $appid
+    $azureTenantId = $tenant
+    $azurePassword = ConvertTo-SecureString $pass -AsPlainText -Force	
     $psCred = New-Object System.Management.Automation.PSCredential($azureAplicationId , $azurePassword)	
     Connect-AzAccount -Credential $psCred -TenantId $azureTenantId  -ServicePrincipal	
     	
