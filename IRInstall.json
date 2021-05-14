@@ -28,6 +28,9 @@
     },
     "container": {
       "type": "string"
+    },
+    "hashdiondemand": {
+      "type": "string"
     }
   },
   "variables": {},
