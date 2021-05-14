@@ -367,7 +367,6 @@ if ($install_python) {
     $python_exe = "$PSScriptRoot\$filename"	
         	
     #$download_node = $TRUE	
-    	
     #if (Test-Path $node_msi) {	
     #   $confirmation = read-host "Local $filename file detected. Do you want to use it ? [Y/n]"	
     #    if ($confirmation -eq "n") {	
@@ -425,7 +424,6 @@ Function DownloadBlobContents {
     #$containers=Get-AzStorageContainer -Context $ctx   	
     ## Loop through the containers  	
     ## check if folder exists  	
-    #$folderPath=$downloadPath+"\"+$container.Name  	
     Trace-Log -ForegroundColor Magenta $container "-downloading contents"  	
     ## Get the blob contents from the container  	
     $blobContents = Get-AzStorageBlob -Container $container  -Context $ctx  	
@@ -466,19 +464,6 @@ Get-Command Connect-AzAccount
 
 
 
-#install AZ packages
-#Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope AllUsers 	
-#Install-Module -Name PowerShellGet -Force -Scope AllUsers -AllowClobber	
-#Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted	
-#[Environment]::SetEnvironmentVariable("PSModulePath",$newModulePath)	
-#Write-Host "PSModulePath " + $env:PSModulePath	
-#$azmodule = $path + "\Az"	
-#import-module -Name $azmodule -verbose	
-#Get-Command Connect-AzAccount	
-
-
-
-
 function start-jobhere([scriptblock]$block){	
     start-job -argumentlist (get-location),$block { set-location $args[0]; invoke-expression $args[1] }	
  }	
@@ -493,14 +478,8 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     Connect-AzAccount -Credential $psCred -TenantId $azureTenantId  -ServicePrincipal	
     	
     	
-    #till i find a storage account to test.	
-    #Connect-AzAccount	
     Trace-Log "setting context to sub: $sub"	
     Set-AzContext -SubscriptionId $sub	
-    #$stname = "devtesthdisabs"	
-    #$rg = "DHUB_GPA-DEV-SAS"	
-    #$stname = $stacc	
-    #fazer isto via powershell	
     $stkeys = Get-AzStorageAccountKey -ResourceGroupName $rg -AccountName $stacc	
     $ctx = New-AzStorageContext -StorageAccountName $stacc -StorageAccountKey $stkeys[0].value	
     	
@@ -508,10 +487,7 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     mkdir $targetpath	
     $ContainerName = $container	
     $BlobName = "hdiondemand"	
-    #$target = "$PSScriptRoot\azf"	
     $target = $targetpath	
-    #Get-AzureStorageBlobContent -Blob $BlobName -Container $ContainerName `	
-    #-Destination $target -Context $ctx	
     	
     DownloadBlobContents -stname $stacc -sub $sub -rg $rg -target $targetpath -container $ContainerName	
     #expand the archive in C:\azf	
@@ -534,9 +510,6 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
     #start-jobhere {func start --verbose true > azflogs.txt}	
 }	
 Install-HDIONDEMAND $sub $rg $stacc $container
-
-
-
 Stop-Transcript
 	
 #Trigger a restart to start azfunctions	
