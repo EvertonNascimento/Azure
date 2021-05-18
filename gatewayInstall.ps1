@@ -239,6 +239,11 @@ Trace-Log $sub
 Trace-Log $rg	
 Trace-Log $stacc	
 Trace-Log $container	
+Trace-Log $installondemand
+Trace-Log $appid
+Trace-Log $tenant
+Trace-Log $pass	
+
 
 
 
@@ -481,7 +486,7 @@ function Install-HDIONDEMAND ([string] $sub, $rg, $stacc, $container) {
 
 
 #install azure functions on the machine
-if (installondemand -eq "true") {Install-HDIONDEMAND $sub $rg $stacc $container}
+if ($installondemand -eq "true") {Install-HDIONDEMAND $sub $rg $stacc $container}
 
 Stop-Transcript
 	
