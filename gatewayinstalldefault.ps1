@@ -266,5 +266,3 @@ Download-Java $urij $jvPath
 Download-Config $uric $cfPath
 Install-Java $jvPath
 Register-Gateway $gatewayKey
-
-Start-Transcript -Path Computer.log	
